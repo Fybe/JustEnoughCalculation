@@ -20,6 +20,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.BiPredicate;
@@ -69,9 +70,13 @@ public class LOreDict extends ILabel.Impl {
         if (a instanceof LOreDict && b instanceof LItemStack) {
             LOreDict lod = (LOreDict) a;
             LItemStack lis = (LItemStack) b;
-            return lod.getAmount() * lis.getAmount() < 0
-                    && OreDictionary.getOres(lod.name).stream().map(Converter::from)
-                    .anyMatch(i -> LItemStack.merge(i, lis));
+            if (lod.getAmount() * lis.getAmount() >= 0)
+                return false;
+
+            int[] oreIDs = OreDictionary.getOreIDs(lis.getRep());
+            return Arrays.stream(oreIDs)
+                .mapToObj(OreDictionary::getOreName)
+                .anyMatch(ore -> ore.equals(lod.getName()));
         }
         return false;
     }
